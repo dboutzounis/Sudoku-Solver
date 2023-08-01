@@ -14,11 +14,9 @@ typedef struct sudoku {
 
 typedef Sudoku *SudokuPtr;
 
-Sudoku *initSudoku(int, int);
+SudokuPtr initSudoku(int);
 void displaySudoku(SudokuPtr);
-int **getGrid(SudokuPtr);
-int getSize(SudokuPtr);
-int getSquareRootOfSize(SudokuPtr);
-int getMissingDigits(SudokuPtr);
+void SudokuSolver(SudokuPtr);
+void destroySudoku(SudokuPtr);
 
 #endif // CODE_SUDOKU_H

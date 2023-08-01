@@ -1,9 +1,11 @@
-#include "./Dancing-Links/dancing-links.h"
+#include "Dancing-Links/dancing-links.h"
 #include "sudoku.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+/* Definition of the Exact Cover Problem struct */
 typedef struct exact_cover {
     Node *head;
     Node **answer;
@@ -15,6 +17,7 @@ typedef struct exact_cover {
     int isSolved;
 } ExactCover;
 
+/* Function for initializing the Exact Cover Problem */
 ExactCover *initExactCover(Sudoku *sudoku) {
     ExactCover *ex_cover = malloc(sizeof(ExactCover));
     ex_cover->head = NULL;
@@ -146,6 +149,7 @@ void makeTorodialDList(ExactCover *ex_cover) {
     ex_cover->head = head;
 }
 
+/* Function for transforming the Torodial Double Linked List based on the Sudoku Grid */
 void transformTorodialDList(ExactCover *ex_cover, Sudoku *sudoku) {
     int pos = 0;
 
@@ -175,10 +179,51 @@ void transformTorodialDList(ExactCover *ex_cover, Sudoku *sudoku) {
     }
 }
 
-void getAnswer(ExactCover *ex_cover, Sudoku *sudoku) {
+/* Function for mapping the answer of the Exact Cover Problem to the Sudoku Grid */
+void MapAnswer(ExactCover *ex_cover, Sudoku *sudoku) {
     for (int i = 0; ex_cover->answer[i] != NULL; i++)
-        sudoku->grid[ex_cover->answer[i]->id[1] - 1][ex_cover->answer[i]->id[2] - 1] = ex_cover->answer[i]->id[1];
+        sudoku->grid[ex_cover->answer[i]->id[1] - 1][ex_cover->answer[i]->id[2] - 1] = ex_cover->answer[i]->id[0];
 
     for (int i = 0; ex_cover->original[i] != NULL; i++)
-        sudoku->grid[ex_cover->original[i]->id[1] - 1][ex_cover->original[i]->id[2] - 1] = ex_cover->original[i]->id[1];
+        sudoku->grid[ex_cover->original[i]->id[1] - 1][ex_cover->original[i]->id[2] - 1] = ex_cover->original[i]->id[0];
+}
+
+/* Algorithm X of Donald Knuth */
+/* Function for searching the solution of the Exact Cover Problem */
+void search(ExactCover *ex_cover, Sudoku *sudoku, int k) {
+    if (ex_cover->head == ex_cover->head->right) {
+        SudokuPtr copy = initSudoku(sudoku->size);
+        MapAnswer(ex_cover, copy);
+        displaySudoku(copy);
+        destroySudoku(copy);
+        ex_cover->isSolved = 1;
+        return;
+    }
+
+    NodePtr col = chooseColumn(ex_cover->head);
+    cover(col);
+
+    for (NodePtr i = col->down; i != col; i = i->down) {
+        ex_cover->answer[k] = i;
+        for (NodePtr j = i->right; j != i; j = j->right)
+            cover(j->colHead);
+        search(ex_cover, sudoku, k + 1);
+        i = ex_cover->answer[k];
+        ex_cover->answer[k] = NULL;
+        for (NodePtr j = i->left; j != i; j = j->left)
+            uncover(j->colHead);
+    }
+    uncover(col);
+}
+
+/* Function for solving the Sudoku */
+void SudokuSolver(SudokuPtr sudoku) {
+    ExactCover *ex_cover = initExactCover(sudoku);
+    makeSparseMatrix(ex_cover);
+    makeTorodialDList(ex_cover);
+    transformTorodialDList(ex_cover, sudoku);
+    search(ex_cover, sudoku, 0);
+    if (!ex_cover->isSolved)
+        printf("No solution found.\n");
+    ex_cover->isSolved = 0;
 }

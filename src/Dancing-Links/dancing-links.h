@@ -6,11 +6,11 @@
 #define CODE_DANCING_LINKS_H
 
 typedef struct node {
-    Node *left;
-    Node *right;
-    Node *up;
-    Node *down;
-    Node *colHead;
+    struct node *left;
+    struct node *right;
+    struct node *up;
+    struct node *down;
+    struct node *colHead;
     int size;
     int id[3];
 } Node;

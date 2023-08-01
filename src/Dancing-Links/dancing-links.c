@@ -4,7 +4,7 @@
 
 NodePtr chooseColumn(Node *head) {
     NodePtr column = head->right;
-    for (NodePtr j = column; j != head; j = j->right) {
+    for (NodePtr j = column->right; j != head; j = j->right) {
         if (j->size < column->size)
             column = j;
     }
