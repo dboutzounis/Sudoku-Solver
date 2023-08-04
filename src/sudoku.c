@@ -26,6 +26,56 @@ SudokuPtr initSudoku(int size) {
     return sudoku;
 }
 
+/* Function for reading a new Sudoku from the user */
+void readSudoku(SudokuPtr sudoku) {
+    if (sudoku == NULL) {
+        fprintf(stderr, "Can't assign values to a Sudoku that is uninitialized...\n");
+        exit(EXIT_FAILURE);
+    }
+
+    int buf[1000] = {0}, size, count = 0, val = 0;
+    char ch;
+
+    ch = getchar();
+    while (ch != EOF && ch != '\n') {
+        if (ch >= '1' && ch <= '9') {
+            if (ch == '1' && sudoku->size > 9) {
+                val = 10 * val + (ch - '0');
+                ch = getchar();
+                char limit = '0' + (sudoku->size - 10);
+                if (ch >= '0' && ch <= limit) {
+                    val = 10 * val + ch;
+                    buf[count++] = val;
+                } else {
+                    ungetc(ch, stdin);
+                }
+                val = 0;
+            } else {
+                buf[count++] = ch - '0';
+            }
+        } else if (ch == '.') {
+            buf[count++] = 0;
+        } else {
+            fprintf(stderr, "Sudoku's cells with assigned values must have numbers between '1' and the size of the Sudoku\nand cells with unassigned must have '.'\n");
+            exit(EXIT_FAILURE);
+        }
+        ch = getchar();
+    }
+
+    size = count;
+    count = 0;
+    if (sudoku->size * sudoku->size != size) {
+        fprintf(stderr, "Error - The Sudoku grid has %d cells and you gave %d values\n", sudoku->size * sudoku->size, size);
+        exit(EXIT_FAILURE);
+    }
+
+    for (int i = 0; i < sudoku->size; i++) {
+        for (int j = 0; j < sudoku->size; j++) {
+            sudoku->grid[i][j] = buf[count++];
+        }
+    }
+}
+
 /* Function for displaying the Sudoku grid*/
 void displaySudoku(SudokuPtr sudoku) {
     int size = sudoku->size, block_size = sudoku->squareRootOfSize, flag = 1;

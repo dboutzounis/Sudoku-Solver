@@ -13,7 +13,7 @@ typedef struct exact_cover {
     int **matrix;
     int row;
     int col;
-    int sudoku_size;
+    int size;
     int isSolved;
 } ExactCover;
 
@@ -21,8 +21,12 @@ typedef struct exact_cover {
 ExactCover *initExactCover(Sudoku *sudoku) {
     ExactCover *ex_cover = malloc(sizeof(ExactCover));
     ex_cover->head = NULL;
-    ex_cover->answer = malloc(1000 * sizeof(NodePtr));
-    ex_cover->original = malloc(1000 * sizeof(NodePtr));
+    ex_cover->answer = malloc(500 * sizeof(NodePtr));
+    ex_cover->original = malloc(500 * sizeof(NodePtr));
+    for (int i = 0; i < 500; i++) {
+        ex_cover->answer[i] = NULL;
+        ex_cover->original[i] = NULL;
+    }
     ex_cover->row = sudoku->size * sudoku->size * sudoku->size;
     ex_cover->col = 4 * sudoku->size * sudoku->size;
     ex_cover->matrix = malloc(ex_cover->row * sizeof(int *));
@@ -30,50 +34,69 @@ ExactCover *initExactCover(Sudoku *sudoku) {
         ex_cover->matrix[i] = malloc(ex_cover->col * sizeof(int));
         memset(ex_cover->matrix[i], 0, ex_cover->col * sizeof(int));
     }
-    ex_cover->sudoku_size = sudoku->size;
+    ex_cover->size = sudoku->size;
     ex_cover->isSolved = 0;
     return ex_cover;
+}
+
+// Function to destroy the ExactCover struct
+void destroyExactCover(ExactCover *ex_cover) {
+    if (ex_cover == NULL)
+        return;
+
+    destroyNode(ex_cover->head);
+
+    for (int i = 0; i < 500; i++) {
+        destroyNode(ex_cover->answer[i]);
+        destroyNode(ex_cover->original[i]);
+    }
+
+    for (int i = 0; i < ex_cover->row; i++)
+        free(ex_cover->matrix[i]);
+    free(ex_cover->matrix);
+
+    free(ex_cover);
 }
 
 /* Function for creating the Sparse Matrix of the Exact Cover Problem */
 void makeSparseMatrix(ExactCover *ex_cover) {
     // Row-Column: Each intersection of a row and column, i.e, each cell, must contain exactly one number.
-    for (int col = 0; col < ex_cover->sudoku_size * ex_cover->sudoku_size; col++)
-        for (int row = 0; row < ex_cover->sudoku_size; row++)
-            ex_cover->matrix[row + col * ex_cover->sudoku_size][col] = 1;
+    for (int col = 0; col < ex_cover->size * ex_cover->size; col++)
+        for (int row = 0; row < ex_cover->size; row++)
+            ex_cover->matrix[row + col * ex_cover->size][col] = 1;
 
     // Row-Number: Each row must contain each number exactly once.
-    int col_offset = ex_cover->sudoku_size * ex_cover->sudoku_size;
-    for (int col = ex_cover->sudoku_size * ex_cover->sudoku_size; col < 2 * ex_cover->sudoku_size * ex_cover->sudoku_size; col++) {
-        int adjusted_col = col % (ex_cover->sudoku_size * ex_cover->sudoku_size);
-        int col_block = adjusted_col / ex_cover->sudoku_size;
-        for (int row = 0; row < ex_cover->sudoku_size; row++) {
-            int x = row + (col_block * ex_cover->sudoku_size) + col_offset;
-            int y = adjusted_col * ex_cover->sudoku_size + row;
+    int col_offset = ex_cover->size * ex_cover->size;
+    for (int col = ex_cover->size * ex_cover->size; col < 2 * ex_cover->size * ex_cover->size; col++) {
+        int adjusted_col = col % (ex_cover->size * ex_cover->size);
+        int col_block = adjusted_col / ex_cover->size;
+        for (int row = 0; row < ex_cover->size; row++) {
+            int x = row + (col_block * ex_cover->size) + col_offset;
+            int y = adjusted_col * ex_cover->size + row;
             ex_cover->matrix[y][x] = 1;
         }
     }
 
     // Column-Number: Each column must contain each number exactly once.
-    col_offset = 2 * ex_cover->sudoku_size * ex_cover->sudoku_size;
-    for (int col = 2 * ex_cover->sudoku_size * ex_cover->sudoku_size; col < 3 * ex_cover->sudoku_size * ex_cover->sudoku_size; col++) {
-        int adjusted_col = col % (ex_cover->sudoku_size * ex_cover->sudoku_size);
-        for (int row = 0; row < ex_cover->sudoku_size; row++) {
-            int x = (row + adjusted_col * ex_cover->sudoku_size) % (ex_cover->sudoku_size * ex_cover->sudoku_size) + col_offset;
-            int y = adjusted_col * ex_cover->sudoku_size + row;
+    col_offset = 2 * ex_cover->size * ex_cover->size;
+    for (int col = 2 * ex_cover->size * ex_cover->size; col < 3 * ex_cover->size * ex_cover->size; col++) {
+        int adjusted_col = col % (ex_cover->size * ex_cover->size);
+        for (int row = 0; row < ex_cover->size; row++) {
+            int x = (row + adjusted_col * ex_cover->size) % (ex_cover->size * ex_cover->size) + col_offset;
+            int y = adjusted_col * ex_cover->size + row;
             ex_cover->matrix[y][x] = 1;
         }
     }
 
     // Box-Number: Each box must contain each number exactly once.
-    int s_size = sqrt(ex_cover->sudoku_size);
-    col_offset = 3 * ex_cover->sudoku_size * ex_cover->sudoku_size;
-    for (int col = 3 * ex_cover->sudoku_size * ex_cover->sudoku_size; col < 4 * ex_cover->sudoku_size * ex_cover->sudoku_size; col++) {
-        int adjusted_col = col % (ex_cover->sudoku_size * ex_cover->sudoku_size);
+    int s_size = sqrt(ex_cover->size);
+    col_offset = 3 * ex_cover->size * ex_cover->size;
+    for (int col = 3 * ex_cover->size * ex_cover->size; col < 4 * ex_cover->size * ex_cover->size; col++) {
+        int adjusted_col = col % (ex_cover->size * ex_cover->size);
         int col_block = (adjusted_col / s_size) % s_size;
-        for (int row = 0; row < ex_cover->sudoku_size; row++) {
-            int x = col_offset + row + (col_block + (adjusted_col / (ex_cover->sudoku_size * s_size)) * s_size) * ex_cover->sudoku_size;
-            int y = adjusted_col * ex_cover->sudoku_size + row;
+        for (int row = 0; row < ex_cover->size; row++) {
+            int x = col_offset + row + (col_block + (adjusted_col / (ex_cover->size * s_size)) * s_size) * ex_cover->size;
+            int y = adjusted_col * ex_cover->size + row;
             ex_cover->matrix[y][x] = 1;
         }
     }
@@ -108,12 +131,12 @@ void makeTorodialDList(ExactCover *ex_cover) {
     for (int i = 0; i < ex_cover->row; i++) {
         NodePtr cur = head->right, prev = NULL;
 
-        if (i != 0 && i % (ex_cover->sudoku_size * ex_cover->sudoku_size) == 0) {
-            id[0] -= ex_cover->sudoku_size - 1;
+        if (i != 0 && i % (ex_cover->size * ex_cover->size) == 0) {
+            id[0] -= ex_cover->size - 1;
             id[1]++;
-            id[2] -= ex_cover->sudoku_size - 1;
-        } else if (i != 0 && i % ex_cover->sudoku_size == 0) {
-            id[0] -= ex_cover->sudoku_size - 1;
+            id[2] -= ex_cover->size - 1;
+        } else if (i != 0 && i % ex_cover->size == 0) {
+            id[0] -= ex_cover->size - 1;
             id[2]++;
         } else {
             id[0]++;
@@ -210,6 +233,7 @@ void search(ExactCover *ex_cover, Sudoku *sudoku, int k) {
         search(ex_cover, sudoku, k + 1);
         i = ex_cover->answer[k];
         ex_cover->answer[k] = NULL;
+        col = i->colHead;
         for (NodePtr j = i->left; j != i; j = j->left)
             uncover(j->colHead);
     }
@@ -225,5 +249,5 @@ void SudokuSolver(SudokuPtr sudoku) {
     search(ex_cover, sudoku, 0);
     if (!ex_cover->isSolved)
         printf("No solution found.\n");
-    ex_cover->isSolved = 0;
+    // destroyExactCover(ex_cover);
 }

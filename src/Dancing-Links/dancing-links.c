@@ -28,11 +28,32 @@ void uncover(Node *column) {
     for (NodePtr i = column->up; i != column; i = i->up) {
         for (NodePtr j = i->left; j != i; j = j->left) {
             (j->colHead->size)++;
-            j->down->down->up = j;
+            j->down->up = j;
             j->up->down = j;
         }
     }
 
     column->left->right = column;
     column->right->left = column;
+}
+
+void destroyNode(NodePtr node) {
+    if (node == NULL)
+        return;
+
+    NodePtr curr = node->right, temp = NULL;
+
+    while (curr != node) {
+        NodePtr curd = curr->down;
+        while (curd != curr) {
+            temp = curd;
+            curd = curd->down;
+            free(temp);
+        }
+        temp = curr;
+        curr = curr->right;
+        free(temp);
+    }
+
+    free(node);
 }

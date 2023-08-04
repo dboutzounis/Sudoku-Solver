@@ -15,6 +15,7 @@ typedef struct sudoku {
 typedef Sudoku *SudokuPtr;
 
 SudokuPtr initSudoku(int);
+void readSudoku(SudokuPtr);
 void displaySudoku(SudokuPtr);
 void SudokuSolver(SudokuPtr);
 void destroySudoku(SudokuPtr);

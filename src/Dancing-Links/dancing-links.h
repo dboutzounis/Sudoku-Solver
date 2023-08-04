@@ -20,5 +20,6 @@ typedef Node *NodePtr;
 NodePtr chooseColumn(NodePtr);
 void cover(NodePtr);
 void uncover(NodePtr);
+void destroyNode(NodePtr);
 
 #endif // CODE_DANCING_LINKS_H
