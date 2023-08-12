@@ -37,6 +37,7 @@ void readSudoku(SudokuPtr sudoku) {
     char ch;
 
     ch = getchar();
+    ch = getchar();
     while (ch != EOF && ch != '\n') {
         if (ch >= '1' && ch <= '9') {
             if (ch == '1' && sudoku->size > 9) {

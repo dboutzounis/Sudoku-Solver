@@ -10,11 +10,13 @@ typedef struct exact_cover {
     Node *head;
     Node **answer;
     Node **original;
+    Node **deallocate;
     int **matrix;
     int row;
     int col;
     int size;
     int isSolved;
+    int count;
 } ExactCover;
 
 /* Function for initializing the Exact Cover Problem */
@@ -29,6 +31,7 @@ ExactCover *initExactCover(Sudoku *sudoku) {
     }
     ex_cover->row = sudoku->size * sudoku->size * sudoku->size;
     ex_cover->col = 4 * sudoku->size * sudoku->size;
+    ex_cover->deallocate = malloc(2 * ex_cover->row * ex_cover->col * sizeof(NodePtr));
     ex_cover->matrix = malloc(ex_cover->row * sizeof(int *));
     for (int i = 0; i < ex_cover->row; i++) {
         ex_cover->matrix[i] = malloc(ex_cover->col * sizeof(int));
@@ -36,6 +39,7 @@ ExactCover *initExactCover(Sudoku *sudoku) {
     }
     ex_cover->size = sudoku->size;
     ex_cover->isSolved = 0;
+    ex_cover->count = 0;
     return ex_cover;
 }
 
@@ -44,12 +48,14 @@ void destroyExactCover(ExactCover *ex_cover) {
     if (ex_cover == NULL)
         return;
 
-    destroyNode(ex_cover->head);
-
-    for (int i = 0; i < 500; i++) {
-        destroyNode(ex_cover->answer[i]);
-        destroyNode(ex_cover->original[i]);
+    for (int i = 0; i < 2 * ex_cover->row * ex_cover->col && ex_cover->deallocate[i] != NULL; i++) {
+        free(ex_cover->deallocate[i]);
     }
+
+    free(ex_cover->head);
+    free(ex_cover->answer);
+    free(ex_cover->original);
+    free(ex_cover->deallocate);
 
     for (int i = 0; i < ex_cover->row; i++)
         free(ex_cover->matrix[i]);
@@ -116,6 +122,7 @@ void makeTorodialDList(ExactCover *ex_cover) {
 
     for (int i = 0; i < ex_cover->col; i++) {
         NodePtr node = malloc(sizeof(Node));
+        ex_cover->deallocate[ex_cover->count++] = node;
         node->left = temp;
         node->right = head;
         node->up = node;
@@ -145,6 +152,7 @@ void makeTorodialDList(ExactCover *ex_cover) {
         for (int j = 0; j < ex_cover->col; j++, cur = cur->right) {
             if (ex_cover->matrix[i][j]) {
                 NodePtr node = malloc(sizeof(Node));
+                ex_cover->deallocate[ex_cover->count++] = node;
                 node->id[0] = id[0];
                 node->id[1] = id[1];
                 node->id[2] = id[2];
@@ -249,5 +257,5 @@ void SudokuSolver(SudokuPtr sudoku) {
     search(ex_cover, sudoku, 0);
     if (!ex_cover->isSolved)
         printf("No solution found.\n");
-    // destroyExactCover(ex_cover);
+    destroyExactCover(ex_cover);
 }
