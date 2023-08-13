@@ -37,12 +37,12 @@ void readSudoku(SudokuPtr sudoku) {
     scanf("%s", str);
     int len = strlen(str), count = 0;
 
-    if (len != 12 && len != 81 && len != 256) {
+    if (len != 16 && len != 81 && len != 256) {
         fprintf(stderr, "-- Error --\nThe Sudoku grid has %d cells and you gave %d values.\n", sudoku->size * sudoku->size, len);
         exit(EXIT_FAILURE);
     }
 
-    if (len == 12 || len == 81) {
+    if (len == 16 || len == 81) {
         for (int i = 0; i < sudoku->size; i++) {
             for (int j = 0; j < sudoku->size; j++) {
                 if (str[count] == '.') {
