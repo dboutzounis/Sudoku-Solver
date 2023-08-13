@@ -43,7 +43,7 @@ ExactCover *initExactCover(Sudoku *sudoku) {
     return ex_cover;
 }
 
-// Function to destroy the ExactCover struct
+/* Function to destroy the ExactCover struct */
 void destroyExactCover(ExactCover *ex_cover) {
     if (ex_cover == NULL)
         return;

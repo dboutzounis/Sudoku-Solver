@@ -38,7 +38,7 @@ void readSudoku(SudokuPtr sudoku) {
     int len = strlen(str), count = 0;
 
     if (len != 12 && len != 81 && len != 256) {
-        fprintf(stderr, "Error - The Sudoku grid has %d cells and you gave %d values\n", sudoku->size * sudoku->size, len);
+        fprintf(stderr, "-- Error --\nThe Sudoku grid has %d cells and you gave %d values.\n", sudoku->size * sudoku->size, len);
         exit(EXIT_FAILURE);
     }
 
@@ -51,7 +51,7 @@ void readSudoku(SudokuPtr sudoku) {
                 } else if (str[count] >= '1' && str[count] <= '9') {
                     sudoku->grid[i][j] = str[count++] - '0';
                 } else {
-                    fprintf(stderr, "Error\nSudoku's cells with assigned values must have numbers between '1' and '%d'\nSudoku's cells with unassigned values must have '.'\n", sudoku->size);
+                    fprintf(stderr, "-- Error --\nSudoku's cells with assigned values must have numbers between '1' and '%d'.\nSudoku's cells with unassigned values must have '.'.\n", sudoku->size);
                     exit(EXIT_FAILURE);
                 }
             }
@@ -65,9 +65,9 @@ void readSudoku(SudokuPtr sudoku) {
                 } else if (str[count] >= '1' && str[count] <= '9') {
                     sudoku->grid[i][j] = str[count++] - '0';
                 } else if (str[count] >= 'A' && str[count] <= 'G') {
-                    sudoku->grid[i][j] = str[count++];
+                    sudoku->grid[i][j] = str[count++] - 55;
                 } else {
-                    fprintf(stderr, "Error\nSudoku's cells with assigned values must have numbers between '1' and '9' and 'A' to 'G'\nSudoku's cells with unassigned values must have '.'\n");
+                    fprintf(stderr, "-- Error --\nSudoku's cells with assigned values must have numbers between '1' and '9' and 'A' to 'G'.\nSudoku's cells with unassigned values must have '.'.\n");
                     exit(EXIT_FAILURE);
                 }
             }
@@ -77,7 +77,7 @@ void readSudoku(SudokuPtr sudoku) {
     free(str);
 }
 
-/* Function for displaying the Sudoku grid*/
+/* Function for displaying the Sudoku grid */
 void displaySudoku(SudokuPtr sudoku) {
     int size = sudoku->size, block_size = sudoku->squareRootOfSize, flag = 1;
 
@@ -106,14 +106,14 @@ void displaySudoku(SudokuPtr sudoku) {
             }
             if (flag) {
                 if (sudoku->grid[i][j] > 9)
-                    printf(" %c ", sudoku->grid[i][j]);
+                    printf(" %c ", sudoku->grid[i][j] + 55);
                 else
                     printf(" %d ", sudoku->grid[i][j]);
 
                 flag = 0;
             } else {
                 if (sudoku->grid[i][j] > 9)
-                    printf("%c ", sudoku->grid[i][j]);
+                    printf("%c ", sudoku->grid[i][j] + 55);
                 else
                     printf("%d ", sudoku->grid[i][j]);
             }
