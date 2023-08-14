@@ -1,4 +1,4 @@
-#include "dancing-links.h"
+#include "../../include/Dancing-Links/dancing-links.h"
 #include <stdio.h>
 #include <stdlib.h>
 

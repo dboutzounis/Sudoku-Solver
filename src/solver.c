@@ -1,5 +1,5 @@
-#include "Dancing-Links/dancing-links.h"
-#include "sudoku.h"
+#include "../include/Dancing-Links/dancing-links.h"
+#include "../include/sudoku.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>

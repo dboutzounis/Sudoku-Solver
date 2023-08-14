@@ -1,4 +1,4 @@
-#include "sudoku.h"
+#include "../include/sudoku.h"
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
