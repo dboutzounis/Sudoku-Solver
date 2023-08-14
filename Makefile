@@ -12,7 +12,7 @@ CFLAGS = -g -Wall -Werror
 LDFLAGS += -lm
 
 # set the name of the executable file to compile here
-PROGRAM = main
+PROGRAM = sudoku
 LAB = test
 
 OBJS = ./src/main.o ./src/sudoku.o ./src/solver.o ./src/Dancing-Links/dancing-links.o
